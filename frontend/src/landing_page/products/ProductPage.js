@@ -7,6 +7,7 @@ import Universe from "./Universe";
 
 import Navbar from "../Navbar";
 import Footer from "../Footer";
+import OpenAccount from "../OpenAccount";
 
 function PricingPage(){
     return(
@@ -16,6 +17,7 @@ function PricingPage(){
         <LeftSection/>
         <RightSection/>
         <Universe/>
+        <OpenAccount/>
         <Footer/>
         </>
     );
