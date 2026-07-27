@@ -8,11 +8,11 @@ import OpenAccount from "../OpenAccount";
 function AboutPage(){
     return(
         <>
-          <Navbar/>
+         
           <Hero/>
           <Team/>
-          <OpenAccount/>
-          <Footer/>
+         
+          
         </>
     );
 }

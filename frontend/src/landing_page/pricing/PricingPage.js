@@ -9,11 +9,11 @@ import OpenAccount from "../OpenAccount";
 function PricingPage(){
     return(
         <>
-        <Navbar/>
+        
         <Brokerage/>
         <Hero/>
         <OpenAccount/>
-        <Footer/>
+       
         
         </>
     );

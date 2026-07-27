@@ -8,11 +8,11 @@ import Footer from '../Footer';
 function SupportPage() {
     return ( 
         <>
-        <Navbar/>
+       
         <CreateTicket/>
         <Hero/>
         <OpenAccount/>
-        <Footer/>
+       
         </>
      );
 }
