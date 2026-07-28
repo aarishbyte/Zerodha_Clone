@@ -26,3 +26,34 @@ code {
 .footer-link a:hover{
   color: #387ed1;
 }
+
+#supportHero{
+  background-color : rgb(56, 126, 209);
+  color: white;
+  padding: 25px 0 60px;
+}
+
+#supportHero a{
+  color: white;
+}
+
+#supportHero h1{
+  line-height: 1.4;
+}
+
+#supportWrapper{
+  display: flex;
+  justify-content: space-between;
+  margin: 0 150px;
+  padding: 0 150px;
+  margin-bottom: 70px;
+}
+
+#supportHero input{
+  padding: 18px 25px;
+  width: 100%;
+  font-size: 18px;
+  border-radius: 10px;
+  border: none;
+
+}

@@ -15,8 +15,8 @@ function LeftSection({
         <div className="col-4 p-4">
           <img src={imageURL}></img>
         </div>
-        <div className="col-3"></div>
-        <div className="col-5 p-5 mt-5">
+        <div className="col-2"></div>
+        <div className="col-6 p-5 mt-5">
           <h1>{productName}</h1>
           <p className="text-muted">{productDescription}</p>
           <div>
