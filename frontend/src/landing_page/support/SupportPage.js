@@ -10,7 +10,6 @@ function SupportPage() {
         <>
         <Hero/>
         <CreateTicket/>
-       
         <OpenAccount/>
        
         </>

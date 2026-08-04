@@ -17,13 +17,13 @@ function Stats(){
 
                 </div>
                 <div className="col-6 p-5">
-                    <img src="media/images/ecosystem.png" style={{width:"90%"}}></img>
+                    <img src="media/images/ecosystem.png" alt="ecosystem.png" style={{width:"90%"}}></img>
                     <div className="text-center">
-                        <a href="" className="mr-5" style={{textDecoration:"none"}}>Explore our products<i class="fa-solid fa-arrow-right"></i></a>
+                        <a href="/" className="mr-5" style={{textDecoration:"none"}}>Explore our products<i class="fa-solid fa-arrow-right"></i></a>
                         &nbsp;
                         &nbsp;
                         &nbsp;
-                        <a href="" style={{textDecoration:"none"}}>Try Kite demo</a>
+                        <a href="/" style={{textDecoration:"none"}}>Try Kite demo</a>
                     </div>
                 </div>
             </div>

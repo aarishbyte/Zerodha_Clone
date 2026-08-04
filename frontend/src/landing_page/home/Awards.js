@@ -38,7 +38,7 @@ function Awards() {
                     </ul>
                         </div>
                     </div>
-                    <img src='media/images/pressLogos.png'style={{width:"90%"}}></img>
+                    <img src='media/images/pressLogos.png' alt='pressLogos.png' style={{width:"90%"}}></img>
                 </div>
             </div>
         </div>

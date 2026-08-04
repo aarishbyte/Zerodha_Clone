@@ -7,7 +7,7 @@ function Hero() {
     {/* 1. Header Navigation */}
     <div className="d-flex justify-content-between align-items-center mx-auto" style={{ maxWidth: "1200px", padding: "30px 20px", borderBottom: "1px solid rgba(255,255,255,0.15)" }}>
       <h4 className="fs-5 fw-medium m-0">Support Portal</h4>
-      <a href="" className="text-white text-decoration-underline fs-6">Track Tickets</a>
+      <a href="/" className="text-white text-decoration-underline fs-6">Track Tickets</a>
     </div>
 
     {/* 2. Main Content Grid */}
@@ -24,10 +24,10 @@ function Hero() {
           style={{ padding: "15px 20px", borderRadius: "4px" }}
         />
         <div className="d-flex flex-wrap gap-3">
-          <a href="" className="text-white text-decoration-underline fs-6 opacity-75 hover-opacity-100">Track account opening</a>
-          <a href="" className="text-white text-decoration-underline fs-6 opacity-75 hover-opacity-100">Track segment activation</a>
-          <a href="" className="text-white text-decoration-underline fs-6 opacity-75 hover-opacity-100">Intraday margins</a>
-          <a href="" className="text-white text-decoration-underline fs-6 opacity-75 hover-opacity-100">Kite user manual</a>
+          <a href="/" className="text-white text-decoration-underline fs-6 opacity-75 hover-opacity-100">Track account opening</a>
+          <a href="/" className="text-white text-decoration-underline fs-6 opacity-75 hover-opacity-100">Track segment activation</a>
+          <a href="/" className="text-white text-decoration-underline fs-6 opacity-75 hover-opacity-100">Intraday margins</a>
+          <a href="/" className="text-white text-decoration-underline fs-6 opacity-75 hover-opacity-100">Kite user manual</a>
         </div>
       </div>
 
@@ -36,10 +36,10 @@ function Hero() {
         <h2 className="fs-4 fw-normal mb-4">Featured</h2>
         <ol className="lh-lg ps-3 fs-6">
           <li className="mb-2">
-            <a href="" className="text-white text-decoration-underline">Current Takeovers and Delisting-January 2025</a>
+            <a href="/" className="text-white text-decoration-underline">Current Takeovers and Delisting-January 2025</a>
           </li>
           <li>
-            <a href="" className="text-white text-decoration-underline">Latest Intraday leverages - MIS & CO</a>
+            <a href="/" className="text-white text-decoration-underline">Latest Intraday leverages - MIS & CO</a>
           </li>
         </ol>
       </div>
