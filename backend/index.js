@@ -7,20 +7,32 @@ const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+const authMiddleware = require("./middleware/auth");
 
 const { HoldingsModel } = require("./model/HoldingsModel");
 const { PositionsModel } = require("./model/PositionsModel");
 const { OrderModel, OrdersModel } = require("./model/OrdersModel");
+const User = require("./model/User");
 
 const PORT = process.env.PORT || 3002;
 const url = process.env.MONGO_URL;
-
+const JWT_SECRET = process.env.JWT_SECRET;
 
 
 const app = express();
 
+app.use(cookieParser());
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ["http://localhost:3000", "http://localhost:3001"],
+    credentials: true,
+  }),
+);
+
 app.use(bodyParser.json());
 
 // app.get("/addHoldings", async(req, res) => {
@@ -192,30 +204,353 @@ app.use(bodyParser.json());
 //   res.send("Done!");
 // });
 
-app.get("/allHoldings", async(req, res)  => {
-    let allHoldings = await HoldingsModel.find({});
-    res.json(allHoldings);
+app.get("/allHoldings", authMiddleware, async (req, res) => {
+  let allHoldings = await HoldingsModel.find({
+    user: req.user.id,
+  });
+  res.json(allHoldings);
 });
 
-app.get("/allPositions", async(req, res)  => {
-    let allPositions = await PositionsModel.find({});
-    res.json(allPositions);
+
+
+app.get("/allPositions",authMiddleware, async (req, res) => {
+  let allPositions = await PositionsModel.find({
+    user: req.user.id,
+  });
+  res.json(allPositions);
 });
 
-app.post("/newOrder", async(req, res)=>{
-    let newOrder = new OrdersModel({
-        name: req.body.name,
-        qty: req.body.qty,
-        price: req.body.price,
-        mode: req.body.mode,
+app.get("/allOrders", authMiddleware, async (req, res) => {
+  try {
+    const allOrders = await OrdersModel.find({
+      user: req.user.id,
     });
 
-    newOrder.save();
+    res.json(allOrders);
+  } catch (err) {
+    console.log(err);
 
+    res.status(500).json({ message: "Failed to fetch orders" });
+  }
+});
+
+app.post("/newOrder", authMiddleware, async (req, res) => {
+  try {
+    const user = await 
+    User.findById(req.user.id);
+
+    if(!user){
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const qty = Number(req.body.qty);
+    const price = Number(req.body.price);
+    const totalAmount = qty * price;
+
+    if(!qty || qty <= 0 || !price || price <= 0){
+      return res.status(400).json({message: "Invalid quantity or price",});
+    }
+
+    if(req.body.mode === "BUY"){
+      if(user.balance < totalAmount ){
+        return res.status(400).json({message: "Insufficient funds",});
+      }
+
+      user.balance -= totalAmount;
+      await user.save();
+    }
+
+
+    let newOrder = new OrdersModel({
+      name: req.body.name,
+      qty: req.body.qty,
+      price: req.body.price,
+      mode: req.body.mode,
+      user: req.user.id,
+    });
+
+    
+
+    //If user is BUYING
+    if (req.body.mode === "BUY") {
+      const existingHolding = await HoldingsModel.findOne({
+        name: req.body.name,
+        user: req.user.id,
+      });
+
+      if (existingHolding) {
+        const oldQty = Number(existingHolding.qty);
+        const newQty = Number(req.body.qty);
+
+        const totalQty = oldQty + newQty;
+
+        existingHolding.avg =
+          (existingHolding.avg * oldQty + req.body.price * newQty) / totalQty;
+
+        existingHolding.qty = totalQty;
+        existingHolding.price = req.body.price;
+
+        await existingHolding.save();
+      } else {
+        const newHolding = new HoldingsModel({
+          name: req.body.name,
+          qty: req.body.qty,
+          avg: req.body.price,
+          price: req.body.price,
+          net: "0.00%",
+          day: "0.00%",
+          user: req.user.id,
+        });
+
+        await newHolding.save();
+      }
+    } else if (req.body.mode === "SELL") {
+      const existingHolding = await HoldingsModel.findOne({
+        name: req.body.name,
+        user: req.user.id,
+      });
+
+      //User doesn't own this stock
+      if (!existingHolding) {
+        return res.status(400).json({ message: "You don't own this stock" });
+      }
+
+      const currentQty = Number(existingHolding.qty);
+      const sellQty = Number(req.body.qty);
+
+      //Trying to sell more than owned
+      if (sellQty > currentQty) {
+        return res.status(400).json({
+          message: "Not enough quantity to sell",
+        });
+      }
+
+      const remainingQty = currentQty - sellQty;
+
+      //Sold all shares
+      if (remainingQty === 0) {
+        await HoldingsModel.deleteOne({ _id: existingHolding._id });
+      }
+      //Still has some shares
+      else {
+        existingHolding.qty = remainingQty;
+        await existingHolding.save();
+      }
+
+      user.balance += totalAmount;
+      await user.save();
+    }
+
+    await newOrder.save();
     res.send("Order saved!");
 
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Order failed" });
+  }
+});
 
-})
+// app.get("auth/callback", (req, res) => {
+//     res.send("Upstox callback successful");
+// });
+
+//Setting up the user authentication and authorization
+
+app.post("/signup", async (req, res) => {
+  try {
+    const { username, email, password } = req.body;
+
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+
+    if (existingUser) {
+      return;
+      res.status(400).json({ message: "User already exists" });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+      username,
+      email,
+      password: hashedPassword,
+    });
+
+    await newUser.save();
+
+    res.status(201).json({ message: "User created successfully" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({
+      message: "Internal Server Error",
+    });
+  }
+});
+
+app.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if (!isMatch) {
+      return res.status(400).json({ message: "Invalid email or password" });
+    }
+
+    const token = jwt.sign(
+      { id: user._id, email: user.email, username: user.username },
+      JWT_SECRET,
+      {
+        expiresIn: "1d",
+      },
+    );
+    res.cookie("token", token, {
+      httpOnly: true,
+    });
+
+    res.status(200).json({
+      message: "Login successful",
+      username: user.username,
+    });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
+
+app.post("/logout", (req, res) => {
+  res.clearCookie("token", { httpOnly: true });
+
+  res.status(200).json({ message: "Logout successful" });
+});
+
+app.get("/verify", authMiddleware, (req, res) => {
+  res.status(200).json({
+    authenticated: true,
+    user: req.user,
+  });
+});
+
+app.get("/protected", authMiddleware, (req, res) => {
+  res.status(200).json({
+    message: "You are authorized!",
+    user: req.user,
+  });
+});
+
+app.get("/funds", authMiddleware, async (req, res) => {
+  try{
+    const user = await User.findById(req.user.id);
+    if(!user){
+      return res.status(404).json({
+        message: "User not found"
+      });
+    }
+
+    if(user.balance === undefined){
+      user.balance = 100000;
+    }
+
+    if(user.usedMargin === undefined){
+      user.usedMargin = 0;
+    }
+
+    await user.save();
+
+
+    res.json({
+      balance: user.balance,
+      usedMargin: user.usedMargin
+    });
+  }catch(err){
+    res.status(500).json({
+      message: "Server error"
+    });
+  }
+});
+
+app.post("/funds/add", authMiddleware, async (req , res) => {
+  try{
+    const { amount } = req.body;
+    const user = await User.findById(req.user.id);
+    
+    if(!user){
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const addAmount = Number(amount);
+
+    if(!addAmount || addAmount <= 0){
+      return res.status(400).json({
+        message: "Enter a valid amount",
+      });
+    }
+
+    user.balance += addAmount;
+
+    await user.save();
+
+    res.json({
+      message: "Funds added successfully",
+      balance: user.balance,
+    });
+  }catch(err){
+    console.log(err);
+
+    res.status(500).json({
+      message: "Server error"
+    });
+  }
+});
+
+app.post("/funds/withdraw", authMiddleware, async( req, res) => {
+  try{
+    const { amount } = req.body;
+    const user = await User.findById(req.user.id);
+
+    if(!user){
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    const withdrawAmount = Number(amount);
+
+    if(!withdrawAmount || withdrawAmount <= 0){
+      return res.status(400).json({message: "Enter a valid amount",});
+    }
+
+    if(withdrawAmount > user.balance){
+      return res.status(400).json({
+        message: "Insufficient funds",
+      });
+    }
+
+    user.balance -= withdrawAmount;
+
+    await user.save();
+
+    res.json({
+      message: "Funds withdrawn successfully",
+      balance: user.balance,
+    });
+  }catch(err){
+    console.log(err);
+    res.status(500).json({
+      message: "Server error",
+    });
+  }
+});
+
+
 
 app.listen(PORT, () => {
   console.log("App started");

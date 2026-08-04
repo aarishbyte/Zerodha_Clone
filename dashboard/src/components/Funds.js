@@ -1,13 +1,84 @@
-import React from "react";
+import React, {useEffect, useState } from "react";
+import axios from "axios";
 import { Link } from "react-router-dom";
 
 const Funds = () => {
+  const [balance, setBalance] = useState(0);
+  const [usedMargin, setUsedMargin] = useState(0);
+  const [amount, setAmount] = useState("");
+  
+  useEffect(() => {
+    const fetchFunds = async ()  => {
+      try{
+        const response = await
+         axios.get("http://localhost:3002/funds", {
+          withCredentials: true,
+        });
+
+        setBalance(response.data.balance);
+        setUsedMargin(response.data.usedMargin);
+      }catch(err){
+        console.log("Error fetching funds:", err);
+      }
+    };
+    fetchFunds();
+  },[]);
+
+  const handleAddFunds = async() => {
+    const enteredAmount = prompt("Enter amount to add:");
+    
+    if(!enteredAmount || Number(enteredAmount) <= 0){
+      return;
+    }
+
+    try{
+      const response = await axios.post(
+        "http://localhost:3002/funds/add",
+        {amount: Number(enteredAmount)},{withCredentials:true}
+      );
+
+      setBalance(response.data.balance);
+      alert("Funds added successfully!");
+    }catch(err){
+      console.log("Error adding funds:", err);
+      alert("Failed to add funds");
+    }
+  };
+
+  const handleWithdraw = async() => {
+    const enteredAmount = prompt("Enter amount to withdraw:");
+
+    if(!enteredAmount || Number(enteredAmount) <= 0){
+      return;
+    }
+
+    try{
+      const response = await axios.post(
+        "http://localhost:3002/funds/withdraw",
+        { amount: Number(enteredAmount)},
+        { withCredentials: true}
+      );
+
+      setBalance(response.data.balance);
+      alert("Funds withdrawn successfully!");
+    }catch(err){
+      console.log("Error withdrawing funds:", err);
+      if(err.response?.data?.message){
+        alert(err.response.data.message);
+      }else{
+        alert("Failed to withdraw funds")
+      }
+    }
+  };
+
+  const availableMargin = balance - usedMargin;
   return (
     <>
       <div className="funds">
         <p>Instant, zero-cost fund transfers with UPI </p>
-        <Link className="btn btn-green">Add funds</Link>
-        <Link className="btn btn-blue">Withdraw</Link>
+        <button className="btn btn-green" onClick={handleAddFunds}>Add Funds</button>
+        <button className="btn btn-blue" onClick={handleWithdraw}>Withdraw</button>
+        
       </div>
 
       <div className="row">
@@ -19,15 +90,15 @@ const Funds = () => {
           <div className="table">
             <div className="data">
               <p>Available margin</p>
-              <p className="imp colored">4,043.10</p>
+              <p className="imp colored">{availableMargin.toFixed(2)}</p>
             </div>
             <div className="data">
               <p>Used margin</p>
-              <p className="imp">3,757.30</p>
+              <p className="imp">{usedMargin.toFixed(2)}</p>
             </div>
             <div className="data">
               <p>Available cash</p>
-              <p className="imp">4,043.10</p>
+              <p className="imp">{balance.toFixed(2)}</p>
             </div>
             <hr />
             <div className="data">

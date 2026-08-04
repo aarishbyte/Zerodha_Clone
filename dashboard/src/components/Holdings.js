@@ -1,18 +1,24 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import GeneralContext from "./GeneralContext";
 import axios, { all } from "axios";
 import { VerticalGraph } from "./VerticalGraph";
 
 // import { holdings } from "../data/data";
 
 const Holdings = () => {
+  const { holdingsRefresh } = useContext(GeneralContext);
   const [allHoldings, setAllHoldings] = useState([]);
 
-  useEffect(() => {
-    axios.get("http://localhost:3002/allHoldings").then((res) => {
-      // console.log(res.data);
+  const fetchHoldings = () => {
+    axios.get("http://localhost:3002/allHoldings",{withCredentials:true,}).then((res) => {
+      console.log("HOLDINGS FROM DATABASE")
       setAllHoldings(res.data);
     });
-  }, []);
+  };
+
+  useEffect(() => {
+    fetchHoldings();
+  }, [holdingsRefresh]);
 
   // const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
   const labels = allHoldings.map((subArray) => subArray["name"]);

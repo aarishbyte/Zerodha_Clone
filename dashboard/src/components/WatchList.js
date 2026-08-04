@@ -14,7 +14,7 @@ import {
 } from "@mui/icons-material";
 
 import { watchlist } from "../data/data";
-import { DoughnutChart } from "./DoughnoutChart";
+import { DoughnutChart } from "./DoughnutChart";
 
 const labels = watchlist.map((subArray) => subArray["name"]);
 
@@ -136,6 +136,10 @@ const WatchListActions = ({ uid }) => {
     generalContext.openBuyWindow(uid);
   };
 
+  const handleSellClick = () => {
+    generalContext.openSellWindow(uid);
+  };
+
   return (
     <span className="actions">
       <span>
@@ -153,6 +157,7 @@ const WatchListActions = ({ uid }) => {
           placement="top"
           arrow
           TransitionComponent={Grow}
+          onClick={handleSellClick}
         >
           <button className="sell">Sell</button>
         </Tooltip>

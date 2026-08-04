@@ -1,10 +1,27 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { Link } from "react-router-dom";
 
 const Menu = () => {
-  const[selectedMenu, setSelectedMenu ] = useState(0);
-  const[isProfileDropdownOpen, setIsProfileDropdownOpen ] = useState(false);
+  const [selectedMenu, setSelectedMenu] = useState(0);
+  const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
+
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    fetch("http://localhost:3002/verify",{
+      method: "GET",
+      credentials: "include",
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      if(data.authenticated)
+        {
+          setUsername(data.user.username);
+        }
+    })
+    .catch((err) =>console.log(err));
+  }, []);
 
   const handleMenuClick = (index) => {
     setSelectedMenu(index);
@@ -12,6 +29,22 @@ const Menu = () => {
 
   const handleProfileClick = (index) => {
     setIsProfileDropdownOpen(!isProfileDropdownOpen);
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("http://localhost:3002/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+
+      if (response.ok) {
+        localStorage.removeItem("username");
+        window.location.href = "http://localhost:3000/login";
+      }
+    } catch (err) {
+      console.log(err);
+    }
   };
 
   const menuClass = "menu";
@@ -91,10 +124,22 @@ const Menu = () => {
         </ul>
         <hr />
         <div className="profile" onClick={handleProfileClick}>
-          <div className="avatar">ZU</div>
-          <p className="username">USERID</p>
+          <div className="avatar">
+            {username ? username.charAt(0).toUpperCase() : "U"}
+          </div>
+          <p className="username">{username || "USERID"}</p>
         </div>
 
+        <span className="profile-arrow">
+          {isProfileDropdownOpen ? "▲" : "▼"}
+        </span>
+
+        {isProfileDropdownOpen && (
+          <div className="profile-dropdown">
+            <div className="dropdown-user">{username || "USERID"}</div>
+            <button onClick={handleLogout}>Logout</button>
+          </div>
+        )}
       </div>
     </div>
   );

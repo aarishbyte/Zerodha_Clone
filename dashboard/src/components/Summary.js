@@ -1,10 +1,29 @@
-import React from "react";
+import React , { useEffect, useState } from "react";
+
+
 
 const Summary = () => {
+  const [username, setUsername] = useState("");
+
+  useEffect(() => {
+    fetch("http://localhost:3002/verify",{
+      method: "GET",
+      credentials: "include",
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log("VERIFY DATA:",data);
+
+      if(data.authenticated){
+        setUsername(data.user.username);
+      }
+    })
+    .catch((err) => console.log(err));
+  }, []);
   return (
     <>
       <div className="username">
-        <h6>Hi, User!</h6>
+        <h6>Hi,{ username || "User "}!</h6>
         <hr className="divider" />
       </div>
 

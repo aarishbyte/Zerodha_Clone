@@ -7,6 +7,21 @@ const HoldingsSchema = new Schema({
     price: Number,
     net: String,
     day: String,
+
+    user: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
+
+    
 });
+
+HoldingsSchema.index(
+        {user: 1, name: 1},
+        {unique: true}
+    );
+
+
 
 module.exports = {HoldingsSchema};
