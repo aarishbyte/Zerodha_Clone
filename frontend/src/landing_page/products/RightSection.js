@@ -17,6 +17,7 @@ function RightSection({ imageURL, productName, productDescription, learnMore }) 
         </div>
         <div className="col-4 p-4">
           <img src={imageURL}
+          alt="imageURL"
           style={{width: "150%"}}></img>
         </div>
       </div>
