@@ -18,7 +18,7 @@ const SellActionWindow = ({ uid }) => {
     setError("");
     try {
       const response = await axios.post(
-        "http://localhost:3002/newOrder",
+        "https://zerodha-clone-j3m4.onrender.com/newOrder",
         {
           name: uid,
           qty: stockQuantity,

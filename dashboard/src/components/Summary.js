@@ -6,7 +6,7 @@ const Summary = () => {
   const [username, setUsername] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:3002/verify",{
+    fetch("https://zerodha-clone-j3m4.onrender.com/verify",{
       method: "GET",
       credentials: "include",
     })

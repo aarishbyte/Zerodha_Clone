@@ -21,14 +21,18 @@ const PORT = process.env.PORT || 3002;
 const url = process.env.MONGO_URL;
 const JWT_SECRET = process.env.JWT_SECRET;
 
-
 const app = express();
 
 app.use(cookieParser());
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:3001"],
+    origin: [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "https://zerodha-clone-854n.vercel.app",
+      "https://zerodha-clone-9x7z.vercel.app",
+    ],
     credentials: true,
   }),
 );
@@ -211,9 +215,7 @@ app.get("/allHoldings", authMiddleware, async (req, res) => {
   res.json(allHoldings);
 });
 
-
-
-app.get("/allPositions",authMiddleware, async (req, res) => {
+app.get("/allPositions", authMiddleware, async (req, res) => {
   let allPositions = await PositionsModel.find({
     user: req.user.id,
   });
@@ -236,10 +238,9 @@ app.get("/allOrders", authMiddleware, async (req, res) => {
 
 app.post("/newOrder", authMiddleware, async (req, res) => {
   try {
-    const user = await 
-    User.findById(req.user.id);
+    const user = await User.findById(req.user.id);
 
-    if(!user){
+    if (!user) {
       return res.status(404).json({
         message: "User not found",
       });
@@ -249,19 +250,18 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
     const price = Number(req.body.price);
     const totalAmount = qty * price;
 
-    if(!qty || qty <= 0 || !price || price <= 0){
-      return res.status(400).json({message: "Invalid quantity or price",});
+    if (!qty || qty <= 0 || !price || price <= 0) {
+      return res.status(400).json({ message: "Invalid quantity or price" });
     }
 
-    if(req.body.mode === "BUY"){
-      if(user.balance < totalAmount ){
-        return res.status(400).json({message: "Insufficient funds",});
+    if (req.body.mode === "BUY") {
+      if (user.balance < totalAmount) {
+        return res.status(400).json({ message: "Insufficient funds" });
       }
 
       user.balance -= totalAmount;
       await user.save();
     }
-
 
     let newOrder = new OrdersModel({
       name: req.body.name,
@@ -270,8 +270,6 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
       mode: req.body.mode,
       user: req.user.id,
     });
-
-    
 
     //If user is BUYING
     if (req.body.mode === "BUY") {
@@ -345,7 +343,6 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
 
     await newOrder.save();
     res.send("Order saved!");
-
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: "Order failed" });
@@ -412,6 +409,8 @@ app.post("/login", async (req, res) => {
     );
     res.cookie("token", token, {
       httpOnly: true,
+      secure: true,
+      sameSite: "none",
     });
 
     res.status(200).json({
@@ -425,7 +424,11 @@ app.post("/login", async (req, res) => {
 });
 
 app.post("/logout", (req, res) => {
-  res.clearCookie("token", { httpOnly: true });
+  res.clearCookie("token",
+     { httpOnly: true,
+      secure: true,
+      sameSite: "none",
+   });
 
   res.status(200).json({ message: "Logout successful" });
 });
@@ -445,42 +448,41 @@ app.get("/protected", authMiddleware, (req, res) => {
 });
 
 app.get("/funds", authMiddleware, async (req, res) => {
-  try{
+  try {
     const user = await User.findById(req.user.id);
-    if(!user){
+    if (!user) {
       return res.status(404).json({
-        message: "User not found"
+        message: "User not found",
       });
     }
 
-    if(user.balance === undefined){
+    if (user.balance === undefined) {
       user.balance = 100000;
     }
 
-    if(user.usedMargin === undefined){
+    if (user.usedMargin === undefined) {
       user.usedMargin = 0;
     }
 
     await user.save();
 
-
     res.json({
       balance: user.balance,
-      usedMargin: user.usedMargin
+      usedMargin: user.usedMargin,
     });
-  }catch(err){
+  } catch (err) {
     res.status(500).json({
-      message: "Server error"
+      message: "Server error",
     });
   }
 });
 
-app.post("/funds/add", authMiddleware, async (req , res) => {
-  try{
+app.post("/funds/add", authMiddleware, async (req, res) => {
+  try {
     const { amount } = req.body;
     const user = await User.findById(req.user.id);
-    
-    if(!user){
+
+    if (!user) {
       return res.status(404).json({
         message: "User not found",
       });
@@ -488,7 +490,7 @@ app.post("/funds/add", authMiddleware, async (req , res) => {
 
     const addAmount = Number(amount);
 
-    if(!addAmount || addAmount <= 0){
+    if (!addAmount || addAmount <= 0) {
       return res.status(400).json({
         message: "Enter a valid amount",
       });
@@ -502,21 +504,21 @@ app.post("/funds/add", authMiddleware, async (req , res) => {
       message: "Funds added successfully",
       balance: user.balance,
     });
-  }catch(err){
+  } catch (err) {
     console.log(err);
 
     res.status(500).json({
-      message: "Server error"
+      message: "Server error",
     });
   }
 });
 
-app.post("/funds/withdraw", authMiddleware, async( req, res) => {
-  try{
+app.post("/funds/withdraw", authMiddleware, async (req, res) => {
+  try {
     const { amount } = req.body;
     const user = await User.findById(req.user.id);
 
-    if(!user){
+    if (!user) {
       return res.status(404).json({
         message: "User not found",
       });
@@ -524,11 +526,11 @@ app.post("/funds/withdraw", authMiddleware, async( req, res) => {
 
     const withdrawAmount = Number(amount);
 
-    if(!withdrawAmount || withdrawAmount <= 0){
-      return res.status(400).json({message: "Enter a valid amount",});
+    if (!withdrawAmount || withdrawAmount <= 0) {
+      return res.status(400).json({ message: "Enter a valid amount" });
     }
 
-    if(withdrawAmount > user.balance){
+    if (withdrawAmount > user.balance) {
       return res.status(400).json({
         message: "Insufficient funds",
       });
@@ -542,15 +544,13 @@ app.post("/funds/withdraw", authMiddleware, async( req, res) => {
       message: "Funds withdrawn successfully",
       balance: user.balance,
     });
-  }catch(err){
+  } catch (err) {
     console.log(err);
     res.status(500).json({
       message: "Server error",
     });
   }
 });
-
-
 
 app.listen(PORT, () => {
   console.log("App started");

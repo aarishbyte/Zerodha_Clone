@@ -11,7 +11,7 @@ const Funds = () => {
     const fetchFunds = async ()  => {
       try{
         const response = await
-         axios.get("http://localhost:3002/funds", {
+         axios.get("https://zerodha-clone-j3m4.onrender.com/funds", {
           withCredentials: true,
         });
 
@@ -33,7 +33,7 @@ const Funds = () => {
 
     try{
       const response = await axios.post(
-        "http://localhost:3002/funds/add",
+        "https://zerodha-clone-j3m4.onrender.com/funds/add",
         {amount: Number(enteredAmount)},{withCredentials:true}
       );
 
@@ -54,7 +54,7 @@ const Funds = () => {
 
     try{
       const response = await axios.post(
-        "http://localhost:3002/funds/withdraw",
+        "https://zerodha-clone-j3m4.onrender.com/funds/withdraw",
         { amount: Number(enteredAmount)},
         { withCredentials: true}
       );

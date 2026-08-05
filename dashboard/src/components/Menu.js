@@ -9,7 +9,7 @@ const Menu = () => {
   const [username, setUsername] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:3002/verify",{
+    fetch("https://zerodha-clone-j3m4.onrender.com/verify",{
       method: "GET",
       credentials: "include",
     })
@@ -33,14 +33,14 @@ const Menu = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("http://localhost:3002/logout", {
+      const response = await fetch("https://zerodha-clone-j3m4.onrender.com/logout", {
         method: "POST",
         credentials: "include",
       });
 
       if (response.ok) {
         localStorage.removeItem("username");
-        window.location.href = "http://localhost:3000/login";
+        window.location.href = "https://zerodha-clone-854n.vercel.app/login";
       }
     } catch (err) {
       console.log(err);

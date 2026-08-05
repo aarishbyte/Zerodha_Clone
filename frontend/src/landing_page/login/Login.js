@@ -6,7 +6,7 @@ function Login() {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://localhost:3002/login", {
+      const response = await fetch("https://zerodha-clone-j3m4.onrender.com/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -23,7 +23,7 @@ function Login() {
 
       if (response.ok) {
         localStorage.setItem("username", data.username);
-        window.location.href = "http://localhost:3001";
+        window.location.href = "https://zerodha-clone-9x7z.vercel.app/";
       } else {
         alert(data.message);
       }
