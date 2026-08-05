@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import GeneralContext from "./GeneralContext";
-import axios, { all } from "axios";
+import axios from "axios";
 import { VerticalGraph } from "./VerticalGraph";
 
 // import { holdings } from "../data/data";

@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 const Funds = () => {
   const [balance, setBalance] = useState(0);
   const [usedMargin, setUsedMargin] = useState(0);
-  const [amount, setAmount] = useState("");
+  // const [amount, setAmount] = useState("");
   
   useEffect(() => {
     const fetchFunds = async ()  => {
