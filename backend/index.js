@@ -376,6 +376,22 @@ app.post("/signup", async (req, res) => {
 
     await newUser.save();
 
+    const token = jwt.sign({
+      id: newUser._id,
+      email: newUser.email,
+      username: newUser.username
+    },
+    JWT_SECRET,{
+      expiresIn : "7d"
+    }
+  );
+
+  res.cookie("token", token, {
+    httpOnly:true,
+    secure:true,
+    sameSite:"none",
+  });
+
     res.status(201).json({ message: "User created successfully" });
   } catch (err) {
     console.log(err);
