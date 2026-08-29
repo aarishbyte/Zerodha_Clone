@@ -29,7 +29,7 @@ const ProtectedRoute = ({ children }) => {
     }
 
     if(!authenticated){
-        window.location.href="http://localhost:3000/login";
+        window.location.href="/login";
         return null;
     }
     return children;
