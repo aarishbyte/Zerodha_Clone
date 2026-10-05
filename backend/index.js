@@ -356,49 +356,74 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
 //Setting up the user authentication and authorization
 
 app.post("/signup", async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
+    console.log("🔥 SIGNUP REQUEST RECEIVED");
 
-    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    try {
+        const { username, email, password } = req.body;
 
-    if (existingUser) {
-      return;
-      res.status(400).json({ message: "User already exists" });
+        console.log("🔥 BODY RECEIVED:", username, email);
+
+        const existingUser = await User.findOne({
+            $or: [{ email }, { username }]
+        });
+
+        console.log("🔥 USER FINDONE COMPLETED");
+
+        if (existingUser) {
+            console.log("🔥 USER ALREADY EXISTS");
+
+            return res.status(400).json({
+                message: "User already exists"
+            });
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        console.log("🔥 PASSWORD HASHED");
+
+        const newUser = new User({
+            username,
+            email,
+            password: hashedPassword,
+        });
+
+        await newUser.save();
+
+        console.log("🔥 USER SAVED");
+
+        const token = jwt.sign(
+            {
+                id: newUser._id,
+                email: newUser.email,
+                username: newUser.username
+            },
+            JWT_SECRET,
+            {
+                expiresIn: "7d"
+            }
+        );
+
+        console.log("🔥 JWT CREATED");
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
+        });
+
+        console.log("🔥 SENDING RESPONSE");
+
+        return res.status(201).json({
+            message: "User created successfully"
+        });
+
+    } catch (err) {
+        console.error("🔥 SIGNUP ERROR:", err);
+
+        return res.status(500).json({
+            message: "Internal server error"
+        });
     }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const newUser = new User({
-      username,
-      email,
-      password: hashedPassword,
-    });
-
-    await newUser.save();
-
-    const token = jwt.sign({
-      id: newUser._id,
-      email: newUser.email,
-      username: newUser.username
-    },
-    JWT_SECRET,{
-      expiresIn : "7d"
-    }
-  );
-
-  res.cookie("token", token, {
-    httpOnly:true,
-    secure:true,
-    sameSite:"none",
-  });
-
-    res.status(201).json({ message: "User created successfully" });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      message: "Internal Server Error",
-    });
-  }
 });
 
 app.post("/login", async (req, res) => {
