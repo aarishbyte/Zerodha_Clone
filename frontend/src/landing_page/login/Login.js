@@ -23,7 +23,7 @@ function Login() {
 
       if (response.ok) {
         localStorage.setItem("username", data.username);
-        window.location.href = "https://zerodha-clone-lozg.vercel.app/";
+        window.location.href = "https://zerodha-clone-lozg.vercel.app";
       } else {
         alert(data.message);
       }
