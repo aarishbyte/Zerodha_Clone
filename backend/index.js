@@ -356,21 +356,21 @@ app.post("/newOrder", authMiddleware, async (req, res) => {
 //Setting up the user authentication and authorization
 
 app.post("/signup", async (req, res) => {
-    console.log("🔥 SIGNUP REQUEST RECEIVED");
+    console.log("SIGNUP REQUEST RECEIVED");
 
     try {
         const { username, email, password } = req.body;
 
-        console.log("🔥 BODY RECEIVED:", username, email);
+        console.log("BODY RECEIVED:", username, email);
 
         const existingUser = await User.findOne({
             $or: [{ email }, { username }]
         });
 
-        console.log("🔥 USER FINDONE COMPLETED");
+        console.log("USER FINDONE COMPLETED");
 
         if (existingUser) {
-            console.log("🔥 USER ALREADY EXISTS");
+            console.log("USER ALREADY EXISTS");
 
             return res.status(400).json({
                 message: "User already exists"
@@ -379,7 +379,7 @@ app.post("/signup", async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        console.log("🔥 PASSWORD HASHED");
+        console.log("PASSWORD HASHED");
 
         const newUser = new User({
             username,
@@ -389,7 +389,7 @@ app.post("/signup", async (req, res) => {
 
         await newUser.save();
 
-        console.log("🔥 USER SAVED");
+        console.log("USER SAVED");
 
         const token = jwt.sign(
             {
@@ -403,7 +403,7 @@ app.post("/signup", async (req, res) => {
             }
         );
 
-        console.log("🔥 JWT CREATED");
+        console.log("JWT CREATED");
 
         res.cookie("token", token, {
             httpOnly: true,
@@ -411,14 +411,14 @@ app.post("/signup", async (req, res) => {
             sameSite: "none",
         });
 
-        console.log("🔥 SENDING RESPONSE");
+        console.log("SENDING RESPONSE");
 
         return res.status(201).json({
             message: "User created successfully"
         });
 
     } catch (err) {
-        console.error("🔥 SIGNUP ERROR:", err);
+        console.error("SIGNUP ERROR:", err);
 
         return res.status(500).json({
             message: "Internal server error"
