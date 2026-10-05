@@ -31,7 +31,7 @@ app.use(
       "http://localhost:3000",
       "http://localhost:3001",
       "https://zerodha-clone-854n.vercel.app",
-      "https://zerodha-clone-9x7z.vercel.app",
+      "https://zerodha-clone-lozg.vercel.app"
     ],
     credentials: true,
   }),
