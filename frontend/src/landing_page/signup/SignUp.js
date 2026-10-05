@@ -26,7 +26,7 @@ function SignUp(){
                 console.log(data);
 
                 if(response.ok){
-                    window.location.href = "https://zerodha-clone-9x7z.vercel.app/login";
+                    window.location.href = "https://zerodha-clone-lozg.vercel.app/login";
                 }
             }catch(err){
                 console.log(err);
